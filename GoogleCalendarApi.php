@@ -32,7 +32,7 @@ class GoogleCalendarApi
      * @param $calendarId string
      * @param $redirectUrl string
      */
-    public function __construct($username,$calendarId='',$redirectUrl='')
+    public function __construct($username,$calendarId='',$redirectUrl='',$state='')
     {
         $this->username = $username;
         $this->calendarId = $calendarId;
@@ -41,6 +41,7 @@ class GoogleCalendarApi
         $this->client->setScopes(Google_Service_Calendar::CALENDAR);
         $this->client->setAuthConfig(\Yii::getAlias("@app/config/").'client_secret.json');
         $this->client->setRedirectUri($redirectUrl);
+        $this->client->setState($state);
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
         $cred = 'google_api_tokens/'.$this->username .'_credentials.json';
@@ -112,16 +113,16 @@ class GoogleCalendarApi
                         'recurrence'=>$event['recurrence'],
                         'attendees' => $event['attendees'],
                         'reminders' => $event['reminders']
-                    ));
-                    return  $service->events->insert($calendarId, $event);
+                    ));                    
+                    return ['status'=>true,'data'=>$service->events->insert($calendarId, $event)];
                 }catch (Google_Service_Exception $e){
-                    echo $e->getMessage();
+                    return ['status'=>false,'data'=>$e->getMessage()];
                 }
             }else{
-                return false;
+                return ['status'=>false,'data'=>null];
             }
         }
-        return false;
+        return ['status'=>false,'data'=>null];;
 
     }
 
